@@ -11,23 +11,28 @@ import {
 import { randomUUID } from 'node:crypto';
 import { getConfig, HOST, PORT } from './config.js';
 import { TheGraphAPI } from './utils/api.js';
+import { SubgraphAPI } from './utils/subgraphApi.js';
 import { tokenTools } from './tools/tokens.js';
 import { nftTools } from './tools/nfts.js';
 import { dexTools } from './tools/dex.js';
+import { subgraphTools } from './tools/subgraphs.js';
 import { handleTokenTool } from './handlers/tokens.js';
 import { handleNFTTool } from './handlers/nfts.js';
 import { handleDEXTool } from './handlers/dex.js';
+import { handleSubgraphTool } from './handlers/subgraphs.js';
 
 export class TheGraphMCPServer {
   private app: express.Application;
   private config: ReturnType<typeof getConfig>;
   private api: TheGraphAPI;
+  private subgraphApi: SubgraphAPI;
   private transports: Map<string, StreamableHTTPServerTransport>;
 
   constructor() {
     this.app = express();
     this.config = getConfig();
     this.api = new TheGraphAPI(this.config);
+    this.subgraphApi = new SubgraphAPI(this.config);
     this.transports = new Map();
 
     this.setupMiddleware();
@@ -158,7 +163,7 @@ export class TheGraphMCPServer {
   private setupHandlers(server: Server): void {
     // List available tools
     server.setRequestHandler(ListToolsRequestSchema, async () => ({
-      tools: [...tokenTools, ...nftTools, ...dexTools],
+      tools: [...tokenTools, ...nftTools, ...dexTools, ...subgraphTools],
     }));
 
     // Handle tool execution
@@ -175,6 +180,8 @@ export class TheGraphMCPServer {
           result = await handleNFTTool(this.api, name, args);
         } else if (name.startsWith('thegraph_dex_')) {
           result = await handleDEXTool(this.api, name, args);
+        } else if (name.startsWith('thegraph_subgraph_')) {
+          result = await handleSubgraphTool(this.subgraphApi, name, args);
         } else {
           throw new McpError(
             ErrorCode.MethodNotFound,

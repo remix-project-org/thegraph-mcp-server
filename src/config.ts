@@ -14,6 +14,7 @@ export function getConfig(): TheGraphConfig {
     apiToken,
     baseUrl: 'https://token-api.thegraph.com',
     defaultNetwork: process.env.DEFAULT_NETWORK || 'mainnet',
+    subgraphApiKey: process.env.THEGRAPH_SUBGRAPH_API_KEY, // Optional system key for production subgraph queries
   };
 }
 
