@@ -88,17 +88,7 @@ const urlSchema = z.string().url().describe('The GraphQL endpoint URL of the sub
 
 // Subgraph ID format (QmXxx... IPFS hash format)
 const subgraphIdSchema = z.string().min(1).describe('The unique identifier for the subgraph (IPFS hash)');
-
-// GraphQL query string (basic validation - must contain query/mutation keyword)
-const graphqlQuerySchema = z.string().min(1).refine(
-  (query) => {
-    const normalizedQuery = query.trim().toLowerCase();
-    return normalizedQuery.includes('query') ||
-           normalizedQuery.includes('mutation') ||
-           normalizedQuery.includes('{');
-  },
-  { message: 'Must be a valid GraphQL query (should contain query, mutation, or { }' }
-).describe('The GraphQL query to execute against the subgraph');
+const graphqlQuerySchema = z.string().min(1).describe('The GraphQL query to execute against the subgraph');
 
 // Subgraph query with custom endpoint
 export const subgraphQuerySchema = z.object({
