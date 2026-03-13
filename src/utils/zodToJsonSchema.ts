@@ -5,7 +5,14 @@ import { z } from 'zod';
  * Extracts descriptions, types, defaults, and validation rules
  */
 export function zodToJsonSchema(schema: z.ZodType<any>): any {
-  const shape = (schema as any)._def.shape?.();
+  // Handle ZodEffects (schemas with .refine(), .transform(), etc.)
+  // We need to unwrap to get to the underlying schema
+  let actualSchema = schema;
+  if (actualSchema instanceof z.ZodEffects) {
+    actualSchema = (actualSchema as any)._def.schema;
+  }
+
+  const shape = (actualSchema as any)._def.shape?.();
   if (!shape) return {};
 
   const properties: any = {};
